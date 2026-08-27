@@ -280,9 +280,8 @@ function LandingPage() {
               </Button>
               <Button
                 asChild
-                variant="outline"
                 size="lg"
-                className="rounded-full border-brand-foreground/30 text-brand-foreground hover:bg-brand-foreground/10 hover:text-brand-foreground"
+                className="rounded-full bg-brand-foreground text-brand hover:bg-brand-foreground/90"
               >
                 <Link to="/preview">Preview menu</Link>
               </Button>
