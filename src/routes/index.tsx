@@ -90,55 +90,54 @@ const capabilities = [
 
 function LandingPage() {
   return (
-    <div className="relative flex min-h-screen flex-col bg-background">
+    <div className="relative flex min-h-dvh flex-col bg-background">
       {/* Header */}
       <header className="sticky top-0 z-20 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-brand-foreground text-lg font-semibold shadow-sm">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:h-16 sm:px-6">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-base font-semibold text-brand-foreground shadow-sm">
               H
             </div>
-            <span className="text-lg font-semibold tracking-tight text-foreground">
+            <span className="text-base font-semibold tracking-tight text-foreground">
               Hap
             </span>
           </Link>
 
-          <div className="flex items-center gap-3">
-            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-              <Link to="/preview">Preview menu</Link>
-            </Button>
-            <Button asChild size="sm" className="rounded-full px-5">
-              <Link to="/admin">Sign in</Link>
-            </Button>
-          </div>
+          <Button asChild size="sm" className="rounded-full px-5">
+            <Link to="/admin">Sign in</Link>
+          </Button>
         </div>
       </header>
 
       <main className="flex-1">
         {/* Hero */}
-        <section className="relative overflow-hidden px-6 pt-16 pb-20 sm:pt-24 sm:pb-28">
+        <section className="relative overflow-hidden px-4 pt-10 pb-14 sm:px-6 sm:pt-24 sm:pb-28">
           <div className="pointer-events-none absolute inset-0 -z-10">
             <div className="absolute left-1/2 top-0 h-[50rem] w-[50rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand/[0.04] blur-3xl" />
             <div className="absolute bottom-0 right-0 h-[32rem] w-[32rem] translate-x-1/3 translate-y-1/3 rounded-full bg-brand-subtle/40 blur-3xl" />
           </div>
 
-          <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
+          <div className="mx-auto grid max-w-6xl items-center gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-16">
             <div className="max-w-xl">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-[11px] font-medium text-muted-foreground shadow-sm sm:mb-6 sm:text-xs">
                 <Sparkles className="h-3.5 w-3.5 text-brand" />
                 <span>Digital menus made simple</span>
               </div>
-              <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              <h1 className="text-[2rem] leading-[1.1] font-semibold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
                 Your menu, everywhere guests look.
               </h1>
-              <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:mt-5 sm:text-lg">
                 Hap gives restaurants one place to manage dishes, run
-                promotions, share QR codes, and understand what guests love — then
-                shows them a beautiful menu on any phone.
+                promotions, share QR codes, and understand what guests love —
+                then shows them a beautiful menu on any phone.
               </p>
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button asChild size="lg" className="rounded-full px-7 shadow-sm">
+              <div className="mt-6 grid grid-cols-1 gap-3 sm:mt-8 sm:flex sm:flex-row">
+                <Button
+                  asChild
+                  size="lg"
+                  className="w-full rounded-full px-7 shadow-sm sm:w-auto"
+                >
                   <Link to="/admin">
                     Sign in to admin
                     <ArrowRight className="ml-1.5 h-4 w-4" />
@@ -148,13 +147,13 @@ function LandingPage() {
                   asChild
                   variant="outline"
                   size="lg"
-                  className="rounded-full px-7"
+                  className="w-full rounded-full px-7 sm:w-auto"
                 >
                   <Link to="/preview">Preview menu</Link>
                 </Button>
               </div>
 
-              <div className="mt-8 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground sm:mt-8 sm:text-sm">
                 {["No setup fees", "Works on any phone", "Real-time updates"].map(
                   (item) => (
                     <span key={item} className="flex items-center gap-1.5">
@@ -173,7 +172,7 @@ function LandingPage() {
                 alt="Hap admin dashboard on a tablet and guest menu on a phone"
                 width={1280}
                 height={720}
-                className="relative rounded-2xl border border-border bg-card shadow-card"
+                className="relative w-full rounded-2xl border border-border bg-card shadow-card"
                 loading="eager"
                 decoding="async"
               />
@@ -182,30 +181,32 @@ function LandingPage() {
         </section>
 
         {/* Features */}
-        <section className="px-6 py-20 sm:py-28">
+        <section className="px-4 py-14 sm:px-6 sm:py-28">
           <div className="mx-auto max-w-6xl">
-            <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            <div className="mx-auto max-w-2xl sm:text-center">
+              <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-4xl">
                 Everything in the admin
               </h2>
-              <p className="mt-4 text-lg text-muted-foreground">
-                From daily menu changes to long-term branding, Hap puts the tools
-                you need in one clean workspace.
+              <p className="mt-3 text-base text-muted-foreground sm:mt-4 sm:text-lg">
+                From daily menu changes to long-term branding, Hap puts the
+                tools you need in one clean workspace.
               </p>
             </div>
 
-            <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 grid gap-3 sm:mt-14 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
               {features.map((feature) => (
                 <Card
                   key={feature.title}
                   className="group border-border/70 bg-card/60 backdrop-blur-sm transition-colors hover:bg-card"
                 >
-                  <CardHeader>
-                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-subtle text-brand">
-                      <feature.icon className="h-5 w-5" />
+                  <CardHeader className="p-4 sm:p-6">
+                    <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-brand-subtle text-brand sm:mb-3 sm:h-10 sm:w-10">
+                      <feature.icon className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                     </div>
-                    <CardTitle className="text-lg">{feature.title}</CardTitle>
-                    <CardDescription className="leading-relaxed">
+                    <CardTitle className="text-base sm:text-lg">
+                      {feature.title}
+                    </CardTitle>
+                    <CardDescription className="text-sm leading-relaxed">
                       {feature.description}
                     </CardDescription>
                   </CardHeader>
@@ -216,22 +217,22 @@ function LandingPage() {
         </section>
 
         {/* Capabilities */}
-        <section className="border-y border-border bg-card/40 px-6 py-20 sm:py-28">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-20">
+        <section className="border-y border-border bg-card/40 px-4 py-14 sm:px-6 sm:py-28">
+          <div className="mx-auto grid max-w-6xl items-center gap-10 sm:gap-12 lg:grid-cols-2 lg:gap-20">
             <div>
-              <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-4xl">
                 What you can do with Hap
               </h2>
-              <p className="mt-4 text-lg text-muted-foreground">
+              <p className="mt-3 text-base text-muted-foreground sm:mt-4 sm:text-lg">
                 Built for busy restaurant teams who want a menu that keeps up
                 with the kitchen, the floor, and the brand.
               </p>
 
-              <ul className="mt-8 space-y-4">
+              <ul className="mt-6 space-y-3.5 sm:mt-8 sm:space-y-4">
                 {capabilities.map((capability) => (
                   <li
                     key={capability}
-                    className="flex items-start gap-3 text-foreground"
+                    className="flex items-start gap-3 text-sm text-foreground sm:text-base"
                   >
                     <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
                       <Check className="h-3 w-3" />
@@ -241,8 +242,12 @@ function LandingPage() {
                 ))}
               </ul>
 
-              <div className="mt-10">
-                <Button asChild size="lg" className="rounded-full px-7 shadow-sm">
+              <div className="mt-8 sm:mt-10">
+                <Button
+                  asChild
+                  size="lg"
+                  className="w-full rounded-full px-7 shadow-sm sm:w-auto"
+                >
                   <Link to="/admin">
                     Open the admin
                     <ArrowRight className="ml-1.5 h-4 w-4" />
@@ -251,7 +256,7 @@ function LandingPage() {
               </div>
             </div>
 
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid grid-cols-2 gap-3 sm:gap-5">
               <StatCard label="Menu items" value="Unlimited" />
               <StatCard label="Promotion styles" value="5+" />
               <StatCard label="QR code tables" value="Any amount" />
@@ -261,27 +266,28 @@ function LandingPage() {
         </section>
 
         {/* CTA */}
-        <section className="px-6 py-20 sm:py-28">
-          <div className="mx-auto max-w-4xl rounded-3xl bg-brand px-6 py-16 text-center text-brand-foreground sm:px-12 sm:py-20">
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+        <section className="px-4 py-14 sm:px-6 sm:py-28">
+          <div className="mx-auto max-w-4xl rounded-3xl bg-brand px-5 py-12 text-center text-brand-foreground sm:px-12 sm:py-20">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-4xl">
               Ready to modernize your menu?
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-brand-foreground/80">
-              Sign in to explore the admin, or preview the guest menu to see what
-              your restaurant could look like.
+            <p className="mx-auto mt-3 max-w-xl text-sm text-brand-foreground/80 sm:mt-4 sm:text-lg">
+              Sign in to explore the admin, or preview the guest menu to see
+              what your restaurant could look like.
             </p>
-            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <div className="mt-7 grid grid-cols-1 gap-3 sm:mt-8 sm:flex sm:justify-center">
               <Button
                 asChild
                 size="lg"
-                className="rounded-full bg-brand-foreground text-brand hover:bg-brand-foreground/90"
+                className="w-full rounded-full bg-brand-foreground text-brand hover:bg-brand-foreground/90 sm:w-auto"
               >
                 <Link to="/admin">Sign in</Link>
               </Button>
               <Button
                 asChild
                 size="lg"
-                className="rounded-full bg-brand-foreground text-brand hover:bg-brand-foreground/90"
+                variant="outline"
+                className="w-full rounded-full border-brand-foreground/30 bg-transparent text-brand-foreground hover:bg-brand-foreground/10 hover:text-brand-foreground sm:w-auto"
               >
                 <Link to="/preview">Preview menu</Link>
               </Button>
@@ -291,15 +297,15 @@ function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border px-6 py-8">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-brand-foreground text-base font-semibold">
+      <footer className="border-t border-border px-4 py-6 sm:px-6 sm:py-8">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 sm:flex-row sm:gap-4">
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-sm font-semibold text-brand-foreground">
               H
             </div>
             <span className="font-semibold text-foreground">Hap</span>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground sm:text-sm">
             © {new Date().getFullYear()} Hap. All rights reserved.
           </p>
         </div>
@@ -311,9 +317,13 @@ function LandingPage() {
 function StatCard({ value, label }: { value: string; label: string }) {
   return (
     <Card className="border-border/70 bg-card/60 text-center">
-      <CardContent className="flex flex-col items-center justify-center py-8">
-        <span className="text-3xl font-semibold text-brand">{value}</span>
-        <span className="mt-1 text-sm text-muted-foreground">{label}</span>
+      <CardContent className="flex flex-col items-center justify-center px-2 py-6 sm:py-8">
+        <span className="text-xl font-semibold text-brand sm:text-3xl">
+          {value}
+        </span>
+        <span className="mt-1 text-xs text-muted-foreground sm:text-sm">
+          {label}
+        </span>
       </CardContent>
     </Card>
   );
