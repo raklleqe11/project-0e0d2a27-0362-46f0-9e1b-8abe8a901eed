@@ -1372,7 +1372,7 @@ function priceColumn(i,{showWas=true}={}){
  const approx=approxPrice(i.price);
  return `<div class="product-price">${was}<span class="product-price-main">${menuPrice(i.price)}</span>${approx?`<span class="product-price-approx">${approx}</span>`:''}</div>`;
 }
-function renderPublicItem(i,c,idx){
+function renderPublicItem(i,c,idx,opts){
  const p=i.promotion||{}; const promoted=isPromoLive(p); const tr=tItem(i); const ing=tr.ingredients;
  const style=promoted?(PROMO_STYLES.some(s=>s[0]===p.style)?p.style:(state.appearance.promotionStyle||'framed')):'';
  const label=escapeHtml(p.label||'Recommended');
@@ -1385,7 +1385,7 @@ function renderPublicItem(i,c,idx){
  const footer=promoted&&style==='offer'
   ? `<div class="promo-offer-strip"><span class="offer-terms">${p.terms?`Offer includes · ${escapeHtml(p.terms)}`:'Offer available now'}</span><span class="offer-price">${p.wasPrice?`<s>${money(Number(p.wasPrice))}</s>`:''}<strong>${menuPrice(i.price)}</strong></span></div>`
   : '';
- return `<article class="menu-product reveal-item ${promoted?`is-promoted promo-${p.intensity||'subtle'} promo-style-${style}`:''} ${i.status==='hidden'?'hidden-item':''}" data-item-id="${i.id}" data-search="${escapeHtml((tr.name+' '+ing+' '+tCategory(c)).toLowerCase())}" style="transition-delay:${Math.min(idx%5*35,140)}ms">${chrome}<img class="product-img" src="${i.image}" alt="${escapeHtml(tr.name)}" loading="lazy"><div class="product-copy"><h3>${escapeHtml(tr.name)}</h3>${ing?`<p>${escapeHtml(ing)}</p>`:''}${itemBadges(i)}</div>${priceColumn(i,{showWas:style!=='offer'})}${footer}${i.status==='soldout'?`<div class="product-status">Sold out</div>`:''}</article>`;
+ return `<article class="menu-product reveal-item ${promoted?`is-promoted promo-${p.intensity||'subtle'} promo-style-${style}`:''} ${i.status==='hidden'?'hidden-item':''}" data-item-id="${i.id}" data-search="${escapeHtml((tr.name+' '+ing+' '+tCategory(c)).toLowerCase())}" style="transition-delay:${Math.min(idx%5*35,140)}ms">${chrome}<img class="product-img" src="${i.image}" alt="${escapeHtml(tr.name)}" loading="lazy"><div class="product-copy"><h3>${escapeHtml(tr.name)}</h3>${ing?`<p>${escapeHtml(ing)}</p>`:''}${itemBadges(i,{interactive:!opts||!opts.static})}</div>${priceColumn(i,{showWas:style!=='offer'})}${footer}${i.status==='soldout'?`<div class="product-status">Sold out</div>`:''}</article>`;
 }
 
 
@@ -1513,7 +1513,7 @@ function renameCategorySheet(){
 function promoPreview(item,category,temp,style){
  const clone={...item,promotion:{active:true,intensity:temp.intensity||'normal',label:temp.label||"Tonight's Pick",style,until:temp.until||'none',wasPrice:temp.wasPrice?Number(temp.wasPrice):null,terms:temp.terms||'',startedAt:Date.now()}};
  const a=state.appearance;
- return `<div class="promo-preview public-root ${state.theme==='dark'?'dark-menu':''} template-${a.template}" style="--menu-brand:${a.brand};--brand:${a.brand}"><div class="product-list">${renderPublicItem(clone,category,0)}</div></div>`;
+ return `<div class="promo-preview public-root ${state.theme==='dark'?'dark-menu':''} template-${a.template}" style="--menu-brand:${a.brand};--brand:${a.brand}"><div class="product-list">${renderPublicItem(clone,category,0,{static:true})}</div></div>`;
 }
 function promoteSheet(){
  const found=getItem(ui.sheetData?.id); if(!found) return ''; const item=found.item, category=found.category; const p=item.promotion||{};
@@ -1524,7 +1524,7 @@ function promoteSheet(){
  return sheetShell(`Promote ${escapeHtml(item.name)}`,'Make it noticeable, not annoying.',`
  ${active>=3?`<div class="promo-warn">${active+1} promotions active — the menu stops feeling special.</div>`:''}
  <div class="sheet-section"><div class="sheet-label">Label</div><div class="preset-scroll">${PROMO_LABELS.map(l=>`<button class="preset ${temp.label===l?'selected':''}" data-action="promo-temp" data-key="label" data-value="${escapeHtml(l)}"><strong>${escapeHtml(l)}</strong></button>`).join('')}</div></div>
- <div class="sheet-section"><div class="sheet-label">Card design</div><div class="promo-gallery">${PROMO_STYLES.map(([id,n,desc])=>`<button class="promo-style-card ${temp.style===id?'selected':''}" data-action="promo-temp" data-key="style" data-value="${id}"><div class="promo-style-head"><strong>${escapeHtml(n)}</strong><span>${escapeHtml(desc)}</span></div>${promoPreview(item,category,temp,id)}</button>`).join('')}</div></div>
+ <div class="sheet-section"><div class="sheet-label">Card design</div><div class="promo-gallery">${PROMO_STYLES.map(([id,n,desc])=>`<div class="promo-style-card ${temp.style===id?'selected':''}" role="button" tabindex="0" data-action="promo-temp" data-key="style" data-value="${id}"><div class="promo-style-head"><strong>${escapeHtml(n)}</strong><span>${escapeHtml(desc)}</span></div>${promoPreview(item,category,temp,id)}</div>`).join('')}</div></div>
  <div class="sheet-section"><div class="sheet-label">Offer detail <small>optional</small></div><div class="form-grid">
   <div class="field"><label>Was price (${escapeHtml(currencyOf().primary)})</label><input type="number" step="0.01" min="0" value="${escapeHtml(String(temp.wasPrice??''))}" data-action="promo-temp-input" data-key="wasPrice" placeholder="Higher than ${escapeHtml(String(item.price))}"></div>
   <div class="field"><label>Terms</label><input value="${escapeHtml(temp.terms||'')}" data-action="promo-temp-input" data-key="terms" placeholder="Today only · 2 plates minimum"></div>
