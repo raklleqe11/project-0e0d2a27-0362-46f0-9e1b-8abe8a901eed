@@ -1705,6 +1705,11 @@ document.addEventListener('scroll',()=>{
  requestAnimationFrame(()=>{ mountTour(); tourTick=false; });
 },true);
 
+app.addEventListener('keydown',e=>{
+ if(e.key!=='Enter'&&e.key!==' ') return;
+ const el=e.target.closest('[role="button"][data-action]'); if(!el) return;
+ e.preventDefault(); el.click();
+});
 app.addEventListener('click',e=>{
  if(state.tour&&state.tour.active){
   const st=tourStep();
