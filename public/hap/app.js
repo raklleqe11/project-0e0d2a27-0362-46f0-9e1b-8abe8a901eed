@@ -963,8 +963,9 @@ function renderRestaurantAdmin(){
 function adminNav(){
  const tabs = state.role==='super'
   ? [['overview','home','Overview'],['restaurants','building','Restaurants'],['users','users','Users'],['plans','chart','Plans'],['settings','settings','Settings']]
-  : [['home','home','Home'],['menu','menu','Menu'],['qr','qr','QR'],['insights','chart','Insights'],['more','more','More']];
- return `<nav class="admin-bottom-nav">${tabs.map(([id,ic,label])=>`<button class="admin-nav-btn ${state.adminTab===id&&!state.adminSubpage?'active':''}" data-action="${state.role==='super'?'super-tab':'admin-tab'}" data-tab="${id}" data-tour="nav-${id}">${icon(ic,21)}<span>${label}</span></button>`).join('')}</nav>`;
+  : [['home','home','Overview'],['menu','menu','Menu'],['promote','spark','Promote'],['insights','chart','Insights'],['settings','settings','Settings']];
+ const activeTab = state.role==='super' ? state.adminTab : (state.adminSubpage ? ADMIN_SUBPAGES[state.adminSubpage].tab : state.adminTab);
+ return `<nav class="admin-bottom-nav">${tabs.map(([id,ic,label])=>`<button class="admin-nav-btn ${activeTab===id?'active':''}" data-action="${state.role==='super'?'super-tab':'admin-tab'}" data-tab="${id}" data-tour="nav-${id}">${icon(ic,21)}<span>${label}</span></button>`).join('')}</nav>`;
 }
 function allItems(){ return state.categories.flatMap(c=>c.items); }
 function setupTasks(){
