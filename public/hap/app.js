@@ -987,8 +987,6 @@ function adminHome(){
  const tonight=weekHours().today;
  const sub=state.restaurant.subscription||{};
  const subStatus=sub.status||'active';
- const missing=missingTranslationCount();
- const langs=extraLanguages();
  return `<div class="page-head" data-tour="restaurant"><div><div class="eyebrow">${greet}</div><h1 class="page-title">${escapeHtml(state.restaurant.name)}</h1><p class="page-subtitle">${escapeHtml(state.restaurant.city)}</p><button class="inline-link" data-action="admin-subpage" data-page="restaurant">${icon('clock',13)} Tonight ${escapeHtml(tonight)} · Change hours</button></div><div class="head-actions"><button class="icon-btn" data-action="admin-tab" data-tab="settings" aria-label="Settings">${icon('settings',19)}</button></div></div>
  <button class="plan-chip" data-action="admin-subpage" data-page="billing">${icon('spark',13)} <strong>${escapeHtml(HAP_PLAN.name)}</strong> · ${platformMoney(HAP_PLAN.price)}/mo · ${escapeHtml(subStatus)} ${icon('chevron',13)}</button>
  <div class="card status-card" data-tour="status"><div class="status-orb">${icon('check',20)}</div><div><strong>Your menu is live</strong><span>${state.categories.length} categories · ${items.filter(i=>i.status!=='hidden').length} visible items · ${escapeHtml(state.preview.language)}</span></div><button class="chip-btn" data-action="share-menu">Share</button></div>
