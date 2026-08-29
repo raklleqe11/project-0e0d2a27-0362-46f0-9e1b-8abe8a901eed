@@ -10,18 +10,49 @@ const QS = new URLSearchParams(location.search);
 const PUBLIC_CTX = QS.get('ctx') === 'public';
 const PUBLIC_SLUG = QS.get('slug') || '';
 let lastPath = '';
-const ADMIN_TAB_PATHS = {home:'/admin',menu:'/admin/menu',promote:'/admin/promotions',design:'/admin/design',qr:'/admin/qr',insights:'/admin/analytics',more:'/admin/more'};
-const ADMIN_SUBPAGE_PATHS = {appearance:'/admin/appearance',staff:'/admin/staff',settings:'/admin/settings',billing:'/admin/billing'};
+const ADMIN_TAB_PATHS = {home:'/admin',menu:'/admin/menu',promote:'/admin/promote',insights:'/admin/insights',settings:'/admin/settings'};
+/* Sub-pages always declare the tab that owns them, so a deep link keeps the
+   right destination highlighted in the bottom navigation. */
+const ADMIN_SUBPAGES = {
+ qr:{path:'/admin/menu/qr',tab:'menu'},
+ restaurant:{path:'/admin/settings/restaurant',tab:'settings'},
+ appearance:{path:'/admin/settings/appearance',tab:'settings'},
+ team:{path:'/admin/settings/team',tab:'settings'},
+ billing:{path:'/admin/settings/billing',tab:'settings'}
+};
+const ADMIN_LEGACY_PATHS = {
+ '/admin/home':'/admin',
+ '/admin/promotions':'/admin/promote',
+ '/admin/analytics':'/admin/insights',
+ '/admin/qr':'/admin/menu/qr',
+ '/admin/design':'/admin/settings/appearance',
+ '/admin/appearance':'/admin/settings/appearance',
+ '/admin/staff':'/admin/settings/team',
+ '/admin/billing':'/admin/settings/billing',
+ '/admin/more':'/admin/settings'
+};
+const ADMIN_LEGACY_TABS = {promotions:'promote',analytics:'insights',more:'settings'};
+const ADMIN_LEGACY_SUBPAGES = {settings:'restaurant',staff:'team',design:'appearance'};
 const SUPER_TAB_PATHS = {overview:'/super',restaurants:'/super/restaurants',users:'/super/users',plans:'/super/plans',settings:'/super/settings'};
+function normalizeAdminState(){
+ if(state.adminSubpage && ADMIN_LEGACY_SUBPAGES[state.adminSubpage]) state.adminSubpage=ADMIN_LEGACY_SUBPAGES[state.adminSubpage];
+ if(state.adminSubpage && !ADMIN_SUBPAGES[state.adminSubpage]) state.adminSubpage=null;
+ if(state.role!=='super'){
+  if(ADMIN_LEGACY_TABS[state.adminTab]) state.adminTab=ADMIN_LEGACY_TABS[state.adminTab];
+  if(state.adminSubpage) state.adminTab=ADMIN_SUBPAGES[state.adminSubpage].tab;
+  else if(!ADMIN_TAB_PATHS[state.adminTab]) state.adminTab='home';
+ }
+}
 function currentPath(){
  if(state.mode==='landing') return '/';
  if(state.mode==='preview') return '/preview';
  if(state.role==='super') return SUPER_TAB_PATHS[state.adminTab] || '/super';
- if(state.adminSubpage) return ADMIN_SUBPAGE_PATHS[state.adminSubpage] || '/admin';
+ normalizeAdminState();
+ if(state.adminSubpage) return ADMIN_SUBPAGES[state.adminSubpage].path;
  return ADMIN_TAB_PATHS[state.adminTab] || '/admin';
 }
 function applyPath(path){
- const p = String(path||'/').split('?')[0].replace(/\/+$/,'') || '/';
+ let p = String(path||'/').split('?')[0].replace(/\/+$/,'') || '/';
  if(p==='/'){ state.mode='landing'; return; }
  if(p==='/preview'){ state.mode='preview'; state.preview.languageConfirmed=true; return; }
  if(p==='/super' || p.startsWith('/super/')){
@@ -29,11 +60,14 @@ function applyPath(path){
   const tab = Object.keys(SUPER_TAB_PATHS).find(k=>k===seg) || 'overview';
   state.mode='admin'; state.role='super'; state.adminTab=tab; state.adminSubpage=null; return;
  }
- const sub = Object.keys(ADMIN_SUBPAGE_PATHS).find(k=>ADMIN_SUBPAGE_PATHS[k]===p);
- if(sub){ state.mode='admin'; state.role='restaurant'; state.adminTab='more'; state.adminSubpage=sub; return; }
+ if(ADMIN_LEGACY_PATHS[p]) p=ADMIN_LEGACY_PATHS[p];
+ state.mode='admin'; state.role='restaurant';
+ const sub = Object.keys(ADMIN_SUBPAGES).find(k=>ADMIN_SUBPAGES[k].path===p);
+ if(sub){ state.adminSubpage=sub; state.adminTab=ADMIN_SUBPAGES[sub].tab; return; }
  const tab = Object.keys(ADMIN_TAB_PATHS).find(k=>ADMIN_TAB_PATHS[k]===p);
- state.mode='admin'; state.role='restaurant'; state.adminSubpage=null; state.adminTab=tab||'home';
+ state.adminSubpage=null; state.adminTab=tab||'home';
 }
+
 
 function syncPath(){
  if(PUBLIC_CTX) return;
