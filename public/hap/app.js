@@ -957,7 +957,7 @@ function renderSkeleton(){
 
 function renderRestaurantAdmin(){
  const ctx = opsCtx();
- const page = state.adminSubpage ? renderAdminSubpage(state.adminSubpage) : ({home:adminHome,menu:adminMenu,promote:adminPromote,design:adminDesign,qr:adminQr,insights:analyticsPage,more:adminMore}[state.adminTab]||adminHome)(ctx);
+ const page = state.adminSubpage ? renderAdminSubpage(state.adminSubpage) : ({home:adminHome,menu:adminMenu,promote:adminPromote,insights:analyticsPage,settings:adminSettingsHub}[state.adminTab]||adminHome)(ctx);
  return `<div class="content-scroll"><main class="admin-main">${page}</main></div>${adminNav()}`;
 }
 function adminNav(){
