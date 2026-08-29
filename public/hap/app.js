@@ -1003,9 +1003,8 @@ function adminHome(){
   <div class="card settings-row"><div class="settings-icon">${icon('eyeOff',18)}</div><div class="settings-copy"><strong>Hide sold-out dishes</strong><span>Remove them instead of greying them out</span></div><button class="switch ${state.hideSoldOut?'on':''}" data-action="toggle-hide-soldout"><i></i></button></div>
  </div></section>
  <section class="section"><div class="section-row"><div class="section-title">Tonight</div><button class="section-link" data-action="admin-tab" data-tab="insights">View insights</button></div><div class="tonight-list">
-  <div class="card signal-row"><div class="signal-icon">${icon('spark',17)}</div><div class="signal-copy"><strong>${promoted?escapeHtml(promoted.item.name):'No active promotion'}</strong><span>${promoted?`${escapeHtml(promoted.item.promotion.label)} · ${escapeHtml(promoted.item.promotion.intensity)}`:'Choose an item to feature'}</span></div><div class="signal-value">${promoted?'1':'0'}</div></div>
+  <button class="card signal-row" data-action="admin-tab" data-tab="promote"><div class="signal-icon">${icon('spark',17)}</div><div class="signal-copy"><strong>${promoted?escapeHtml(promoted.item.name):'No active promotion'}</strong><span>${promoted?`${escapeHtml(promoted.item.promotion.label)} · ${escapeHtml(promoted.item.promotion.intensity)}`:'Choose an item to feature'}</span></div><div class="signal-value">${promoted?'1':'0'}</div>${icon('chevron',15)}</button>
   <div class="card signal-row"><div class="signal-icon">${icon('eyeOff',17)}</div><div class="signal-copy"><strong>Sold-out dishes</strong><span>Tap Menu to restock</span></div><div class="signal-value">${sold}</div></div>
-  <button class="card signal-row" data-action="admin-subpage" data-page="settings"><div class="signal-icon">${icon('globe',17)}</div><div class="signal-copy"><strong>Missing translations</strong><span>${missing?`${langs.map(escapeHtml).join(' + ')} need review`:'Every language is complete'}</span></div><div class="signal-value">${missing}</div>${icon('chevron',15)}</button>
  </div></section>`;
 }
 /* Ordered by what actually happens during a service: add, then the three jobs
