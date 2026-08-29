@@ -974,8 +974,8 @@ function setupTasks(){
   {id:'items',done:items.length>=6,title:'Add at least 6 dishes',sub:`${items.length} added`,action:'open-add-item'},
   {id:'photos',done:items.every(i=>i.image),title:'Add a photo to every dish',sub:'Photos lift attention by ~30%',action:'admin-tab',tab:'menu'},
   {id:'promo',done:!!getPromoted(),title:'Feature one dish',sub:'One tasteful highlight per service',action:'admin-tab',tab:'promote'},
-  {id:'design',done:state.appearance.template!=='modern',title:'Pick a menu template',sub:'Classy, Noir, Market and more',action:'admin-tab',tab:'design'},
-  {id:'qr',done:!!state.qrDownloaded,title:'Download your QR',sub:'Ready for print and windows',action:'admin-tab',tab:'qr'}
+  {id:'design',done:state.appearance.template!=='modern',title:'Pick a menu template',sub:'Classy, Noir, Market and more',action:'admin-subpage',page:'appearance'},
+  {id:'qr',done:!!state.qrDownloaded,title:'Download your QR',sub:'Ready for print and windows',action:'admin-subpage',page:'qr'}
  ];
 }
 function adminHome(){
