@@ -10,18 +10,49 @@ const QS = new URLSearchParams(location.search);
 const PUBLIC_CTX = QS.get('ctx') === 'public';
 const PUBLIC_SLUG = QS.get('slug') || '';
 let lastPath = '';
-const ADMIN_TAB_PATHS = {home:'/admin',menu:'/admin/menu',promote:'/admin/promotions',design:'/admin/design',qr:'/admin/qr',insights:'/admin/analytics',more:'/admin/more'};
-const ADMIN_SUBPAGE_PATHS = {appearance:'/admin/appearance',staff:'/admin/staff',settings:'/admin/settings',billing:'/admin/billing'};
+const ADMIN_TAB_PATHS = {home:'/admin',menu:'/admin/menu',promote:'/admin/promote',insights:'/admin/insights',settings:'/admin/settings'};
+/* Sub-pages always declare the tab that owns them, so a deep link keeps the
+   right destination highlighted in the bottom navigation. */
+const ADMIN_SUBPAGES = {
+ qr:{path:'/admin/menu/qr',tab:'menu'},
+ restaurant:{path:'/admin/settings/restaurant',tab:'settings'},
+ appearance:{path:'/admin/settings/appearance',tab:'settings'},
+ team:{path:'/admin/settings/team',tab:'settings'},
+ billing:{path:'/admin/settings/billing',tab:'settings'}
+};
+const ADMIN_LEGACY_PATHS = {
+ '/admin/home':'/admin',
+ '/admin/promotions':'/admin/promote',
+ '/admin/analytics':'/admin/insights',
+ '/admin/qr':'/admin/menu/qr',
+ '/admin/design':'/admin/settings/appearance',
+ '/admin/appearance':'/admin/settings/appearance',
+ '/admin/staff':'/admin/settings/team',
+ '/admin/billing':'/admin/settings/billing',
+ '/admin/more':'/admin/settings'
+};
+const ADMIN_LEGACY_TABS = {promotions:'promote',analytics:'insights',more:'settings'};
+const ADMIN_LEGACY_SUBPAGES = {settings:'restaurant',staff:'team',design:'appearance'};
 const SUPER_TAB_PATHS = {overview:'/super',restaurants:'/super/restaurants',users:'/super/users',plans:'/super/plans',settings:'/super/settings'};
+function normalizeAdminState(){
+ if(state.adminSubpage && ADMIN_LEGACY_SUBPAGES[state.adminSubpage]) state.adminSubpage=ADMIN_LEGACY_SUBPAGES[state.adminSubpage];
+ if(state.adminSubpage && !ADMIN_SUBPAGES[state.adminSubpage]) state.adminSubpage=null;
+ if(state.role!=='super'){
+  if(ADMIN_LEGACY_TABS[state.adminTab]) state.adminTab=ADMIN_LEGACY_TABS[state.adminTab];
+  if(state.adminSubpage) state.adminTab=ADMIN_SUBPAGES[state.adminSubpage].tab;
+  else if(!ADMIN_TAB_PATHS[state.adminTab]) state.adminTab='home';
+ }
+}
 function currentPath(){
  if(state.mode==='landing') return '/';
  if(state.mode==='preview') return '/preview';
  if(state.role==='super') return SUPER_TAB_PATHS[state.adminTab] || '/super';
- if(state.adminSubpage) return ADMIN_SUBPAGE_PATHS[state.adminSubpage] || '/admin';
+ normalizeAdminState();
+ if(state.adminSubpage) return ADMIN_SUBPAGES[state.adminSubpage].path;
  return ADMIN_TAB_PATHS[state.adminTab] || '/admin';
 }
 function applyPath(path){
- const p = String(path||'/').split('?')[0].replace(/\/+$/,'') || '/';
+ let p = String(path||'/').split('?')[0].replace(/\/+$/,'') || '/';
  if(p==='/'){ state.mode='landing'; return; }
  if(p==='/preview'){ state.mode='preview'; state.preview.languageConfirmed=true; return; }
  if(p==='/super' || p.startsWith('/super/')){
@@ -29,11 +60,14 @@ function applyPath(path){
   const tab = Object.keys(SUPER_TAB_PATHS).find(k=>k===seg) || 'overview';
   state.mode='admin'; state.role='super'; state.adminTab=tab; state.adminSubpage=null; return;
  }
- const sub = Object.keys(ADMIN_SUBPAGE_PATHS).find(k=>ADMIN_SUBPAGE_PATHS[k]===p);
- if(sub){ state.mode='admin'; state.role='restaurant'; state.adminTab='more'; state.adminSubpage=sub; return; }
+ if(ADMIN_LEGACY_PATHS[p]) p=ADMIN_LEGACY_PATHS[p];
+ state.mode='admin'; state.role='restaurant';
+ const sub = Object.keys(ADMIN_SUBPAGES).find(k=>ADMIN_SUBPAGES[k].path===p);
+ if(sub){ state.adminSubpage=sub; state.adminTab=ADMIN_SUBPAGES[sub].tab; return; }
  const tab = Object.keys(ADMIN_TAB_PATHS).find(k=>ADMIN_TAB_PATHS[k]===p);
- state.mode='admin'; state.role='restaurant'; state.adminSubpage=null; state.adminTab=tab||'home';
+ state.adminSubpage=null; state.adminTab=tab||'home';
 }
+
 
 function syncPath(){
  if(PUBLIC_CTX) return;
@@ -923,14 +957,15 @@ function renderSkeleton(){
 
 function renderRestaurantAdmin(){
  const ctx = opsCtx();
- const page = state.adminSubpage ? renderAdminSubpage(state.adminSubpage) : ({home:adminHome,menu:adminMenu,promote:adminPromote,design:adminDesign,qr:adminQr,insights:analyticsPage,more:adminMore}[state.adminTab]||adminHome)(ctx);
+ const page = state.adminSubpage ? renderAdminSubpage(state.adminSubpage) : ({home:adminHome,menu:adminMenu,promote:adminPromote,insights:analyticsPage,settings:adminSettingsHub}[state.adminTab]||adminHome)(ctx);
  return `<div class="content-scroll"><main class="admin-main">${page}</main></div>${adminNav()}`;
 }
 function adminNav(){
  const tabs = state.role==='super'
   ? [['overview','home','Overview'],['restaurants','building','Restaurants'],['users','users','Users'],['plans','chart','Plans'],['settings','settings','Settings']]
-  : [['home','home','Home'],['menu','menu','Menu'],['qr','qr','QR'],['insights','chart','Insights'],['more','more','More']];
- return `<nav class="admin-bottom-nav">${tabs.map(([id,ic,label])=>`<button class="admin-nav-btn ${state.adminTab===id&&!state.adminSubpage?'active':''}" data-action="${state.role==='super'?'super-tab':'admin-tab'}" data-tab="${id}" data-tour="nav-${id}">${icon(ic,21)}<span>${label}</span></button>`).join('')}</nav>`;
+  : [['home','home','Overview'],['menu','menu','Menu'],['promote','spark','Promote'],['insights','chart','Insights'],['settings','settings','Settings']];
+ const activeTab = state.role==='super' ? state.adminTab : (state.adminSubpage ? ADMIN_SUBPAGES[state.adminSubpage].tab : state.adminTab);
+ return `<nav class="admin-bottom-nav">${tabs.map(([id,ic,label])=>`<button class="admin-nav-btn ${activeTab===id?'active':''}" data-action="${state.role==='super'?'super-tab':'admin-tab'}" data-tab="${id}" data-tour="nav-${id}">${icon(ic,21)}<span>${label}</span></button>`).join('')}</nav>`;
 }
 function allItems(){ return state.categories.flatMap(c=>c.items); }
 function setupTasks(){
@@ -939,8 +974,8 @@ function setupTasks(){
   {id:'items',done:items.length>=6,title:'Add at least 6 dishes',sub:`${items.length} added`,action:'open-add-item'},
   {id:'photos',done:items.every(i=>i.image),title:'Add a photo to every dish',sub:'Photos lift attention by ~30%',action:'admin-tab',tab:'menu'},
   {id:'promo',done:!!getPromoted(),title:'Feature one dish',sub:'One tasteful highlight per service',action:'admin-tab',tab:'promote'},
-  {id:'design',done:state.appearance.template!=='modern',title:'Pick a menu template',sub:'Classy, Noir, Market and more',action:'admin-tab',tab:'design'},
-  {id:'qr',done:!!state.qrDownloaded,title:'Download your QR',sub:'Ready for print and windows',action:'admin-tab',tab:'qr'}
+  {id:'design',done:state.appearance.template!=='modern',title:'Pick a menu template',sub:'Classy, Noir, Market and more',action:'admin-subpage',page:'appearance'},
+  {id:'qr',done:!!state.qrDownloaded,title:'Download your QR',sub:'Ready for print and windows',action:'admin-subpage',page:'qr'}
  ];
 }
 function adminHome(){
@@ -952,26 +987,22 @@ function adminHome(){
  const tonight=weekHours().today;
  const sub=state.restaurant.subscription||{};
  const subStatus=sub.status||'active';
- const missing=missingTranslationCount();
- const langs=extraLanguages();
- return `<div class="page-head" data-tour="restaurant"><div><div class="eyebrow">${greet}</div><h1 class="page-title">${escapeHtml(state.restaurant.name)}</h1><p class="page-subtitle">${escapeHtml(state.restaurant.city)}</p><button class="inline-link" data-action="admin-subpage" data-page="settings">${icon('clock',13)} Tonight ${escapeHtml(tonight)} · Change hours</button></div><div class="head-actions"><button class="icon-btn" data-action="admin-tab" data-tab="more" aria-label="More">${icon('settings',19)}</button></div></div>
+ return `<div class="page-head" data-tour="restaurant"><div><div class="eyebrow">${greet}</div><h1 class="page-title">${escapeHtml(state.restaurant.name)}</h1><p class="page-subtitle">${escapeHtml(state.restaurant.city)}</p><button class="inline-link" data-action="admin-subpage" data-page="restaurant">${icon('clock',13)} Tonight ${escapeHtml(tonight)} · Change hours</button></div><div class="head-actions"><button class="icon-btn" data-action="admin-tab" data-tab="settings" aria-label="Settings">${icon('settings',19)}</button></div></div>
  <button class="plan-chip" data-action="admin-subpage" data-page="billing">${icon('spark',13)} <strong>${escapeHtml(HAP_PLAN.name)}</strong> · ${platformMoney(HAP_PLAN.price)}/mo · ${escapeHtml(subStatus)} ${icon('chevron',13)}</button>
  <div class="card status-card" data-tour="status"><div class="status-orb">${icon('check',20)}</div><div><strong>Your menu is live</strong><span>${state.categories.length} categories · ${items.filter(i=>i.status!=='hidden').length} visible items · ${escapeHtml(state.preview.language)}</span></div><button class="chip-btn" data-action="share-menu">Share</button></div>
- ${done<tasks.length?`<section class="section"><div class="card checklist" data-tour="checklist"><div class="checklist-head"><div><strong>Finish setting up</strong><span>${done} of ${tasks.length} done</span></div><div class="ring" style="--pct:${pct}"><span>${pct}%</span></div></div><div class="checklist-body">${tasks.map(t=>`<button class="check-row ${t.done?'done':''}" data-action="${t.done?'noop':t.action}" ${t.tab?`data-tab="${t.tab}"`:''}><i class="check-box">${t.done?icon('check',12):''}</i><div><strong>${t.title}</strong><span>${t.sub}</span></div>${t.done?'':icon('chevron',15)}</button>`).join('')}</div></div></section>`:''}
+ ${done<tasks.length?`<section class="section"><div class="card checklist" data-tour="checklist"><div class="checklist-head"><div><strong>Finish setting up</strong><span>${done} of ${tasks.length} done</span></div><div class="ring" style="--pct:${pct}"><span>${pct}%</span></div></div><div class="checklist-body">${tasks.map(t=>`<button class="check-row ${t.done?'done':''}" data-action="${t.done?'noop':t.action}" ${t.tab?`data-tab="${t.tab}"`:''} ${t.page?`data-page="${t.page}"`:''}><i class="check-box">${t.done?icon('check',12):''}</i><div><strong>${t.title}</strong><span>${t.sub}</span></div>${t.done?'':icon('chevron',15)}</button>`).join('')}</div></div></section>`:''}
  <section class="section"><div class="section-row"><div class="section-title">Quick actions</div></div><div class="quick-grid">
   <button class="card quick" data-action="open-add-item" data-tour="item"><div class="quick-icon">${icon('plus',18)}</div><div><strong>Add item</strong><span>Dish, price, photo</span></div></button>
-  <button class="card quick" data-action="admin-tab" data-tab="promote"><div class="quick-icon">${icon('spark',18)}</div><div><strong>Promote</strong><span>Make something noticeable</span></div></button>
-  <button class="card quick" data-action="admin-tab" data-tab="qr"><div class="quick-icon">${icon('qr',18)}</div><div><strong>QR code</strong><span>Download or share</span></div></button>
-  <button class="card quick" data-action="admin-tab" data-tab="design"><div class="quick-icon">${icon('palette',18)}</div><div><strong>Design</strong><span>Templates & colour</span></div></button>
+  <button class="card quick" data-action="promo-chooser"><div class="quick-icon">${icon('spark',18)}</div><div><strong>New promotion</strong><span>A dish or a section</span></div></button>
+  <button class="card quick" data-action="bulk-availability"><div class="quick-icon">${icon('eyeOff',18)}</div><div><strong>Availability</strong><span>Mark dishes sold out</span></div></button>
  </div></section>
  <section class="section"><div class="section-row"><div class="section-title">Service controls</div></div><div class="settings-list">
   <div class="card settings-row"><div class="settings-icon">${icon('clock',18)}</div><div class="settings-copy"><strong>${state.restaurant.status==='Open'?'Open now':'Closed'}</strong><span>Shown at the top of the public menu</span></div><button class="switch ${state.restaurant.status==='Open'?'on':''}" data-action="toggle-open"><i></i></button></div>
   <div class="card settings-row"><div class="settings-icon">${icon('eyeOff',18)}</div><div class="settings-copy"><strong>Hide sold-out dishes</strong><span>Remove them instead of greying them out</span></div><button class="switch ${state.hideSoldOut?'on':''}" data-action="toggle-hide-soldout"><i></i></button></div>
  </div></section>
  <section class="section"><div class="section-row"><div class="section-title">Tonight</div><button class="section-link" data-action="admin-tab" data-tab="insights">View insights</button></div><div class="tonight-list">
-  <div class="card signal-row"><div class="signal-icon">${icon('spark',17)}</div><div class="signal-copy"><strong>${promoted?escapeHtml(promoted.item.name):'No active promotion'}</strong><span>${promoted?`${escapeHtml(promoted.item.promotion.label)} · ${escapeHtml(promoted.item.promotion.intensity)}`:'Choose an item to feature'}</span></div><div class="signal-value">${promoted?'1':'0'}</div></div>
+  <button class="card signal-row" data-action="admin-tab" data-tab="promote"><div class="signal-icon">${icon('spark',17)}</div><div class="signal-copy"><strong>${promoted?escapeHtml(promoted.item.name):'No active promotion'}</strong><span>${promoted?`${escapeHtml(promoted.item.promotion.label)} · ${escapeHtml(promoted.item.promotion.intensity)}`:'Choose an item to feature'}</span></div><div class="signal-value">${promoted?'1':'0'}</div>${icon('chevron',15)}</button>
   <div class="card signal-row"><div class="signal-icon">${icon('eyeOff',17)}</div><div class="signal-copy"><strong>Sold-out dishes</strong><span>Tap Menu to restock</span></div><div class="signal-value">${sold}</div></div>
-  <button class="card signal-row" data-action="admin-subpage" data-page="settings"><div class="signal-icon">${icon('globe',17)}</div><div class="signal-copy"><strong>Missing translations</strong><span>${missing?`${langs.map(escapeHtml).join(' + ')} need review`:'Every language is complete'}</span></div><div class="signal-value">${missing}</div>${icon('chevron',15)}</button>
  </div></section>`;
 }
 /* Ordered by what actually happens during a service: add, then the three jobs
@@ -982,11 +1013,12 @@ function adminMenu(){
  const items=allItems();
  const counts={all:items.length,soldout:items.filter(i=>i.status==='soldout').length,hidden:items.filter(i=>i.status==='hidden').length,promoted:items.filter(i=>isPromoLive(i.promotion)).length};
  const cats=state.categories.map(c=>({...c,items:c.items.filter(i=>(!q||(i.name+' '+itemIngredients(i)).toLowerCase().includes(q))&&(filter==='all'||(filter==='soldout'&&i.status==='soldout')||(filter==='hidden'&&i.status==='hidden')||(filter==='promoted'&&isPromoLive(i.promotion))))})).filter(c=>!q&&filter==='all'?true:c.items.length);
- return `<div class="page-head"><div><div class="eyebrow">Manage</div><h1 class="page-title">Menu</h1><p class="page-subtitle">${state.categories.length} categories · ${counts.all} dishes${counts.soldout?` · ${counts.soldout} sold out`:''}</p></div><button class="icon-btn" data-action="add-chooser" data-tour="category" aria-label="Add item or category">${icon('plus',20)}</button></div>
+ return `<div class="page-head"><div><div class="eyebrow">Manage</div><h1 class="page-title">Menu</h1><p class="page-subtitle">${state.categories.length} categories · ${counts.all} dishes${counts.soldout?` · ${counts.soldout} sold out`:''}</p></div><div class="head-actions"><button class="icon-btn" data-action="admin-subpage" data-page="qr" aria-label="Menu QR code">${icon('qr',19)}</button><button class="icon-btn" data-action="add-chooser" data-tour="category" aria-label="Add item or category">${icon('plus',20)}</button></div></div>
  <section class="section"><div class="section-row"><div class="section-title">Quick actions</div></div><div class="quick-grid">
   <button class="card quick" data-action="bulk-availability"><div class="quick-icon">${icon('eyeOff',18)}</div><div><strong>Mark sold out</strong><span>Tap dishes, save once</span></div></button>
   <button class="card quick" data-action="bulk-price"><div class="quick-icon">${icon('edit',18)}</div><div><strong>Update prices</strong><span>Every dish, inline</span></div></button>
   <button class="card quick" data-action="promo-chooser"><div class="quick-icon">${icon('spark',18)}</div><div><strong>Promote</strong><span>A dish or a section</span></div></button>
+  <button class="card quick" data-action="admin-subpage" data-page="qr"><div class="quick-icon">${icon('qr',18)}</div><div><strong>QR code</strong><span>Download or share</span></div></button>
  </div></section>
  <label class="search-field" data-tour="menu-search">${icon('search',17)}<input id="admin-search" value="${escapeHtml(ui.adminSearch||'')}" placeholder="Search dishes"></label>
  <div class="filter-row">${[['all','All'],['soldout','Sold out'],['hidden','Hidden'],['promoted','Promoted']].map(([id,n])=>`<button class="filter-chip ${filter===id?'active':''}" data-action="menu-filter" data-filter="${id}">${n}${counts[id]?` <b>${counts[id]}</b>`:''}</button>`).join('')}</div>
